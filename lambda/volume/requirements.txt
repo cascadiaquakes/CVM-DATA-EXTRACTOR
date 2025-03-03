@@ -1,0 +1,10 @@
+boto3
+numpy
+xarray
+netCDF4
+h5netcdf
+scipy
+pyproj
+s3fs
+fsspec
+dask
