@@ -3,12 +3,13 @@ import aws_cdk as cdk
 import aws_cdk.aws_iam as iam
 import aws_cdk.aws_lambda as aws_lambda
 from constructs import Construct
+from lib.deployment_environment_config import DeploymentEnvironmentConfig
 
 """
 
 """
 class CvmCrescentExtractStackStack(Stack):
-  def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+  def __init__(self, scope: Construct, construct_id: str, config: DeploymentEnvironmentConfig, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
     # Resources
@@ -114,14 +115,14 @@ class CvmCrescentExtractStackStack(Stack):
                 ],
                 'Effect': 'Allow',
                 'Resource': [
-                  'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu',
-                  'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu/*',
+                  f'arn:aws:s3:::{config.bucket_name}',
+                  f'arn:aws:s3:::{config.bucket_name}/*',
                 ],
               },
               {
                 'Action': 's3:ListBucket',
                 'Effect': 'Allow',
-                'Resource': 'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu',
+                'Resource': f'arn:aws:s3:::{config.bucket_name}',
               },
             ],
             'Version': '2012-10-17',
@@ -150,14 +151,14 @@ class CvmCrescentExtractStackStack(Stack):
                 ],
                 'Effect': 'Allow',
                 'Resource': [
-                  'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu',
-                  'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu/*',
+                  f'arn:aws:s3:::{config.bucket_name}',
+                  f'arn:aws:s3:::{config.bucket_name}/*',
                 ],
               },
               {
                 'Action': 's3:ListBucket',
                 'Effect': 'Allow',
-                'Resource': 'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu',
+                'Resource': f'arn:aws:s3:::{config.bucket_name}',
               },
             ],
             'Version': '2012-10-17',
@@ -186,14 +187,14 @@ class CvmCrescentExtractStackStack(Stack):
                 ],
                 'Effect': 'Allow',
                 'Resource': [
-                  'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu',
-                  'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu/*',
+                  f'arn:aws:s3:::{config.bucket_name}',
+                  f'arn:aws:s3:::{config.bucket_name}/*',
                 ],
               },
               {
                 'Action': 's3:ListBucket',
                 'Effect': 'Allow',
-                'Resource': 'arn:aws:s3:::cvm-s3-data-crescent-us-east-2-aer1lu3eichu',
+                'Resource': f'arn:aws:s3:::{config.bucket_name}',
               },
             ],
             'Version': '2012-10-17',
@@ -212,10 +213,10 @@ class CvmCrescentExtractStackStack(Stack):
             'variables': {
               'APP_VERSION': 'c93d99d5',
               'LOG_LEVEL': 'INFO',
-              'ENVIRONMENT': 'crescent',
+              'ENVIRONMENT': config.runtime_environment_name,
             },
           },
-          function_name = 'cvm-data-extractor-extract-slice',
+          function_name = f'{config.resource_prefix}cvm-data-extractor-extract-slice',
           memory_size = 8192,
           package_type = 'Image',
           role = cvmExtractSliceDataLambdaServiceRoleF6543ee7.attr_arn,
@@ -241,10 +242,10 @@ class CvmCrescentExtractStackStack(Stack):
             'variables': {
               'APP_VERSION': 'c93d99d5',
               'LOG_LEVEL': 'INFO',
-              'ENVIRONMENT': 'crescent',
+              'ENVIRONMENT': config.runtime_environment_name,
             },
           },
-          function_name = 'cvm-data-extractor-extract-volume',
+          function_name = f'{config.resource_prefix}cvm-data-extractor-extract-volume',
           memory_size = 8192,
           package_type = 'Image',
           role = cvmExtractVolumeDataLambdaServiceRoleAad7232d.attr_arn,
@@ -270,10 +271,10 @@ class CvmCrescentExtractStackStack(Stack):
             'variables': {
               'APP_VERSION': 'c93d99d5',
               'LOG_LEVEL': 'INFO',
-              'ENVIRONMENT': 'crescent',
+              'ENVIRONMENT': config.runtime_environment_name,
             },
           },
-          function_name = 'cvm-data-extractor-extract-xsection',
+          function_name = f'{config.resource_prefix}cvm-data-extractor-extract-xsection',
           memory_size = 8192,
           package_type = 'Image',
           role = cvmExtractXsectionDataLambdaServiceRoleB62036ca.attr_arn,
