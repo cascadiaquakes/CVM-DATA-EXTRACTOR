@@ -15,11 +15,10 @@ from constructs import Construct
 from lib.deployment_environment_config import DeploymentEnvironmentConfig
 
 COMMON_LAMBDA_PROPS = {
-    "runtime": _lambda.Runtime.PYTHON_3_12,
     "tracing": _lambda.Tracing.ACTIVE,
     "memory_size": 8192,
     "timeout": Duration.seconds(120),
-    "ephemeral_storage_size:": Size.gibibytes(5),
+    "ephemeral_storage_size": Size.gibibytes(5),
     "environment": {
         "LOG_LEVEL": "INFO",
     },
@@ -44,8 +43,7 @@ class CvmExtractLambdaStack(Stack):
             "CvmExtractVolumeDataLambda",
             function_name = config.lambda_function_name_volume,
             code = _lambda.DockerImageCode.from_image_asset(str(project_root / "lambda" / "volume")),
-            **COMMON_LAMBDA_PROPS,
-            timeout = Duration.seconds(90)
+            **(COMMON_LAMBDA_PROPS | {"timeout": Duration.seconds(90)})
         )
         data_bucket.grant_read_write(volume_function)
         volume_function.add_to_role_policy(
