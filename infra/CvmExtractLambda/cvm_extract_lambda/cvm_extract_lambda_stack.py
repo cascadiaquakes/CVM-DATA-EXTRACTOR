@@ -7,6 +7,7 @@ from aws_cdk import (
     Size,
     Stack,
     Tags,
+    aws_iam as iam
 )
 from constructs import Construct
 
@@ -33,12 +34,54 @@ class CvmExtractLambdaStack(Stack):
 
         project_root = Path(__file__).resolve().parents[3]
 
-        dataBucket = s3.Bucket.from_bucket_arn(self, "DataBucket", bucket_arn=f"arn:aws:s3:::{config.bucket_name}")
+        data_bucket = s3.Bucket.from_bucket_arn(self, "DataBucket", bucket_arn=f"arn:aws:s3:::{config.bucket_name}")
 
 
 
-    # volume
+        # volume
+        volume_function = _lambda.DockerImageFunction(
+            self,
+            "CvmExtractVolumeDataLambda",
+            function_name = config.lambda_function_name_volume,
+            code = _lambda.DockerImageCode.from_image_asset(str(project_root / "lambda" / "volume")),
+            **COMMON_LAMBDA_PROPS,
+        )
+        data_bucket.grant_read_write(volume_function)
+        volume_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["s3:ListBucket"],
+                resources=[data_bucket.bucket_arn]
+            )
+        )
 
-    # xsection
+        # xsection
+        xsection_function = _lambda.DockerImageFunction(
+            self,
+            "CvmExtractXSectionDataLambda",
+            function_name = config.lambda_function_name_xsection,
+            code = _lambda.DockerImageCode.from_image_asset(str(project_root / "lambda" / "xsection")),
+            **COMMON_LAMBDA_PROPS,
+        )
+        data_bucket.grant_read_write(xsection_function)
+        xsection_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["s3:ListBucket"],
+                resources=[data_bucket.bucket_arn]
+            )
+        )
 
-    # slice
+        # slice
+        slice_function = _lambda.DockerImageFunction(
+            self,
+            "CvmExtractSliceDataLambda",
+            function_name = config.lambda_function_name_slice,
+            code = _lambda.DockerImageCode.from_image_asset(str(project_root / "lambda" / "slice")),
+            **COMMON_LAMBDA_PROPS,
+        )
+        data_bucket.grant_read_write(slice_function)
+        slice_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["s3:ListBucket"],
+                resources=[data_bucket.bucket_arn]
+            )
+        )
