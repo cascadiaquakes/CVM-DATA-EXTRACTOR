@@ -1,0 +1,89 @@
+name: Deploy with CDK
+run-name: ${{ github.actor }} triggered workflow
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout when the 'permissions' key is present
+env:
+  RELATIVE_PATH_TO_CDK_APP: infra/CvmExtractLambda
+jobs:
+  deploy_dev:
+    name: Deploy Dev Resources
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: 'dev-deployments'
+      cancel-in-progress: false
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: assumedRoleForGithubSession
+          aws-region: us-east-2
+      - name: set up Node.js for CDK
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: set up Python for CDK
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install CDK Dependencies
+        run: |
+          npm install -g aws-cdk
+          cd ${{ env.RELATIVE_PATH_TO_CDK_APP }}
+          pip install -r requirements.txt
+      - name: Deploy with CDK
+        run: |
+          pwd
+          cd ${{ env.RELATIVE_PATH_TO_CDK_APP }}
+          pwd
+          cdk diff --context deployment-environment=dev
+          cdk deploy --require-approval never --context deployment-environment=dev
+  deploy_prod:
+    name: Deploy to Prod Environment
+    needs: deploy_dev
+    environment:
+      name: Production
+    runs-on: ubuntu-latest
+    concurrency:
+      group: 'prod-deployments'
+      cancel-in-progress: false
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: assumedRoleForGithubSession
+          aws-region: us-east-2
+      - name: set up Node.js for CDK
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: set up Python for CDK
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install CDK Dependencies
+        run: |
+          npm install -g aws-cdk
+          cd ${{ env.RELATIVE_PATH_TO_CDK_APP }}
+          pip install -r requirements.txt
+      - name: Deploy with CDK
+        run: |
+          cd ${{ env.RELATIVE_PATH_TO_CDK_APP }}
+          cdk diff --context deployment-environment=prod
+          # cdk deploy --require-approval never --context deployment-environment=prod
