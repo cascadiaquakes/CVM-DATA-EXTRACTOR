@@ -8,9 +8,6 @@ from lib.deployment_environment_config import DeploymentEnvironmentConfig
 
 AWS_ACCOUNT_ID = '818214664804'
 AWS_REGION = 'us-east-2'
-#ECR_REPOSITORY_NAME = os.getenv("ECR_REPOSITORY_NAME", default='cvm-web')
-#ECR_REGISTRY_DOMAIN_NAME = os.getenv("ECR_REGISTRY_DOMAIN_NAME",
-#                                     default=f'{AWS_ACCOUNT_ID}.dkr.ecr.{AWS_REGION}.amazonaws.com')
 
 # Define configuration based on the deployment environment.
 # NOTE: The `deployment-environment` MUST be provided at runtime via CDK context.
