@@ -242,7 +242,7 @@ def lambda_handler(event, context):
             # Write the DataFrame to CSV directly to S3
             fs = s3fs.S3FileSystem()
             with fs.open(s3_path, 'w') as f:
-                df.to_csv(f, sep=",", index=False)
+                df.to_csv(f, sep=",", index=False, na_rep="NaN")
             logger.info("Data written in CSV format.")
 
         elif output_format == "netcdf":
@@ -288,7 +288,7 @@ def lambda_handler(event, context):
             fs = s3fs.S3FileSystem()
             with fs.open(s3_path, 'w') as f:
                 f.write(metadata)  # Write metadata as comments at the top
-                df.to_csv(f, sep=delimiter, index=False)
+                df.to_csv(f, sep=delimiter, index=False, na_rep="NaN")
             logger.info("Data written in GeoCSV format.")
 
         elif output_format == "hdf5":
