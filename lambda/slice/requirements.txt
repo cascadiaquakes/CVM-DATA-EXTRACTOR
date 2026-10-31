@@ -3,6 +3,7 @@ numpy
 xarray
 netCDF4
 h5netcdf
+h5py
 scipy
 pyproj
 s3fs
